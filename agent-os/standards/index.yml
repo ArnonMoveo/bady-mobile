@@ -1,0 +1,13 @@
+# Agent OS Standards Index
+
+unity:
+  csharp-style:
+    description: Naming conventions, serialization, encapsulation, and file organization for Unity C#.
+  netcode:
+    description: Rules for RPCs, NetworkVariables, server authority, and spawning with Netcode for GameObjects.
+  performance:
+    description: Mobile optimization rules — garbage collection, Update loops, object pooling, rendering.
+  architecture:
+    description: Singletons, ServiceLocator, ScriptableObject patterns, state machines, scene management.
+  project-structure:
+    description: Directory layout, Scripts organization, asset naming conventions.
