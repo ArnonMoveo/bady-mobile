@@ -43,7 +43,7 @@ namespace Bady.Kitchen
             return _counterTopPoint;
         }
 
-        public void SetKitchenObject(KitchenObject kitchenObject)
+        public virtual void SetKitchenObject(KitchenObject kitchenObject)
         {
             _kitchenObject = kitchenObject;
 
@@ -63,9 +63,45 @@ namespace Bady.Kitchen
             return _kitchenObject != null;
         }
 
-        public void ClearKitchenObject()
+        public virtual void ClearKitchenObject()
         {
             _kitchenObject = null;
+        }
+
+        /// <summary>
+        /// Resolves the calling player's IKitchenObjectParent from an RPC sender.
+        /// Returns false if the client is invalid or missing a player object.
+        /// </summary>
+        protected bool TryGetPlayerParent(RpcParams rpcParams, out IKitchenObjectParent playerParent)
+        {
+            playerParent = null;
+            ulong clientId = rpcParams.Receive.SenderClientId;
+
+            if (!NetworkManager.ConnectedClients.TryGetValue(clientId, out NetworkClient networkClient))
+                return false;
+
+            if (networkClient.PlayerObject == null)
+                return false;
+
+            playerParent = networkClient.PlayerObject.GetComponent<IKitchenObjectParent>();
+            return playerParent != null;
+        }
+
+        /// <summary>
+        /// Transfers a kitchen object between this counter and the player.
+        /// If counter has item and player is empty, gives item to player.
+        /// If player has item and counter is empty, places item on counter.
+        /// </summary>
+        protected void TransferKitchenObject(IKitchenObjectParent playerParent)
+        {
+            if (HasKitchenObject() && !playerParent.HasKitchenObject())
+            {
+                GetKitchenObject().SetKitchenObjectParent(playerParent);
+            }
+            else if (!HasKitchenObject() && playerParent.HasKitchenObject())
+            {
+                playerParent.GetKitchenObject().SetKitchenObjectParent(this);
+            }
         }
     }
 }
