@@ -12,10 +12,11 @@ Open the `bady-mobile/` folder in Unity Hub. Unity auto-downloads packages from 
 
 ## Key Dependencies
 
-- Unity 6 / 2022.3 LTS with URP (14.0.11)
-- Netcode for GameObjects (1.8.1) — multiplayer framework
-- Unity Input System (1.7.0) — touch controls
-- Unity Transport (1.4.1) — network transport
+- Unity 6 (6000.3.8f1) with URP (17.3.0)
+- Netcode for GameObjects (2.8.0) — multiplayer framework
+- Unity Input System (1.18.0) — touch controls
+- Unity Transport (2.6.0) — network transport
+- TextMeshPro — bundled in UGUI 2.0.0 (no separate package)
 
 ## Repository Structure
 

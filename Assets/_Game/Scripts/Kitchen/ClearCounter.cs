@@ -16,10 +16,10 @@ namespace Bady.Kitchen
             InteractServerRpc();
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void InteractServerRpc(ServerRpcParams serverRpcParams = default)
+        [Rpc(SendTo.Server)]
+        private void InteractServerRpc(RpcParams rpcParams = default)
         {
-            ulong clientId = serverRpcParams.Receive.SenderClientId;
+            ulong clientId = rpcParams.Receive.SenderClientId;
 
             if (!NetworkManager.ConnectedClients.TryGetValue(clientId, out NetworkClient networkClient))
             {
