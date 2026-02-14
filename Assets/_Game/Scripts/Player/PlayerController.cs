@@ -1,6 +1,7 @@
 using System;
 using Bady.Core;
 using Bady.Input;
+using Bady.Kitchen;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Bady.Player
     /// and procedural tilt. Owner-authoritative — input is processed only on the owning client.
     /// Requires NetworkObject and NetworkTransform (owner-authoritative) on the prefab.
     /// </summary>
-    public sealed class PlayerController : NetworkBehaviour
+    public sealed class PlayerController : NetworkBehaviour, IKitchenObjectParent
     {
         public sealed class OnSelectedInteractableChangedEventArgs : EventArgs
         {
@@ -32,6 +33,9 @@ namespace Bady.Player
         [SerializeField] private float _tiltAngle = 15f;
         [SerializeField] private float _tiltSpeed = 10f;
 
+        [Header("Kitchen Object")]
+        [SerializeField] private Transform _kitchenObjectHoldPoint;
+
         private const int MaxHitResults = 4;
 
         private Rigidbody _rigidbody;
@@ -41,6 +45,18 @@ namespace Bady.Player
         private readonly RaycastHit[] _hitResults = new RaycastHit[MaxHitResults];
         private readonly OnSelectedInteractableChangedEventArgs _selectedInteractableEventArgs = new();
         private Vector2 _cachedInput;
+        private KitchenObject _kitchenObject;
+
+        /// <summary>
+        /// The local player's PlayerController instance. Set on the owning client during OnNetworkSpawn.
+        /// </summary>
+        public static PlayerController LocalInstance { get; private set; }
+
+        /// <summary>
+        /// Fires after LocalInstance is set. Used by systems that need the local player reference
+        /// but may initialize before the player spawns (e.g. SelectedCounterVisual).
+        /// </summary>
+        public static event EventHandler OnLocalInstanceSet;
 
         /// <summary>
         /// Fires when the currently selected interactable changes (including to/from null).
@@ -62,6 +78,9 @@ namespace Bady.Player
 
             if (!IsOwner) return;
 
+            LocalInstance = this;
+            OnLocalInstanceSet?.Invoke(this, EventArgs.Empty);
+
             _gameInput = GameInput.Instance;
             _lastInteractDirection = transform.forward;
 
@@ -74,6 +93,8 @@ namespace Bady.Player
             base.OnNetworkDespawn();
 
             if (!IsOwner) return;
+
+            LocalInstance = null;
 
             if (_gameInput != null)
             {
@@ -98,6 +119,31 @@ namespace Bady.Player
             if (!IsOwner) return;
 
             HandleMovement();
+        }
+
+        public Transform GetKitchenObjectFollowTransform()
+        {
+            return _kitchenObjectHoldPoint;
+        }
+
+        public void SetKitchenObject(KitchenObject kitchenObject)
+        {
+            _kitchenObject = kitchenObject;
+        }
+
+        public KitchenObject GetKitchenObject()
+        {
+            return _kitchenObject;
+        }
+
+        public bool HasKitchenObject()
+        {
+            return _kitchenObject != null;
+        }
+
+        public void ClearKitchenObject()
+        {
+            _kitchenObject = null;
         }
 
         private void HandleMovement()
